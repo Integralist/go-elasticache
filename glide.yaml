@@ -1,0 +1,3 @@
+package: github.com/integralist/go-elasticache
+import:
+- package: github.com/bradfitz/gomemcache

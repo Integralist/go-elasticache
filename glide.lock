@@ -1,0 +1,6 @@
+hash: 3db16705c58a946645540356035c5695e98f57d63002f7df99069694d25342c3
+updated: 2016-05-10T12:49:21.903886643+01:00
+imports:
+- name: github.com/bradfitz/gomemcache
+  version: fb1f79c6b65acda83063cbc69f6bba1522558bfc
+devImports: []
