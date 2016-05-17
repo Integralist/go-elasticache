@@ -60,7 +60,7 @@ func clusterNodes() ([]string, error) {
 
 	conn, err := net.Dial("tcp", endpoint)
 	if err != nil {
-		log.Println("Socket Dial: ", err.Error())
+		log.Printf("Socket Dial (%s): %s", endpoint, err.Error())
 		return nil, err
 	}
 	defer conn.Close()
@@ -115,6 +115,7 @@ func parseNodes(conn io.Reader) (string, error) {
 		return "", err
 	}
 
+	log.Println("ElastiCache nodes found: ", response)
 	return response, nil
 }
 
@@ -137,10 +138,7 @@ func parseURLs(response string) ([]string, error) {
 		nodes = append(nodes, node)
 		urls = append(urls, node.URL)
 
-		fmt.Printf("Host: %s\n", node.Host)
-		fmt.Printf("IP: %s\n", node.IP)
-		fmt.Printf("Port: %d\n", node.Port)
-		fmt.Printf("URL: %s\n\n", node.URL)
+		log.Printf("Host: %s, IP: %s, Port: %d, URL: %s", node.Host, node.IP, node.Port, node.URL)
 	}
 
 	return urls, nil
