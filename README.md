@@ -35,12 +35,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/integralist/go-elasticache/elasticache"
 )
 
 func main() {
-	mc := elasticache.New()
+	mc, err := elasticache.New()
+	if err != nil {
+		log.Fatalf("Error: %s", err.Error())
+	}
+
 	mc.Set(&elasticache.Item{Key: "foo", Value: []byte("my value")})
 
 	it, err := mc.Get("foo")

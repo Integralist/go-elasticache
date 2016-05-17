@@ -41,13 +41,13 @@ func (c *Client) Set(item *Item) {
 }
 
 // New returns an instance of the memcache client
-func New() *Client {
+func New() (*Client, error) {
 	urls, err := clusterNodes()
 	if err != nil {
-		fmt.Println(err.Error())
+		return &Client{}, err
 	}
 
-	return &Client{Client: memcache.New(urls...)}
+	return &Client{Client: memcache.New(urls...)}, nil
 }
 
 func clusterNodes() ([]string, error) {
