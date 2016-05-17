@@ -46,11 +46,13 @@ func main() {
 		log.Fatalf("Error: %s", err.Error())
 	}
 
-	mc.Set(&elasticache.Item{Key: "foo", Value: []byte("my value")})
+	if err := mc.Set(&elasticache.Item{Key: "foo", Value: []byte("my value")}); err != nil {
+		log.Println(err.Error())
+	}
 
 	it, err := mc.Get("foo")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return
 	}
 

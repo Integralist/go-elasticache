@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"strconv"
@@ -32,8 +33,8 @@ type Client struct {
 // by copying over the values provided by the user into the Set method,
 // as coercing the custom Item type to the required memcache.Item type isn't possible.
 // Downside is if memcache client fields ever change, it'll introduce a break
-func (c *Client) Set(item *Item) {
-	c.Client.Set(&memcache.Item{
+func (c *Client) Set(item *Item) error {
+	return c.Client.Set(&memcache.Item{
 		Key:        item.Key,
 		Value:      item.Value,
 		Expiration: item.Expiration,
@@ -44,7 +45,7 @@ func (c *Client) Set(item *Item) {
 func New() (*Client, error) {
 	urls, err := clusterNodes()
 	if err != nil {
-		return &Client{}, err
+		log.Println(err.Error())
 	}
 
 	return &Client{Client: memcache.New(urls...)}, nil
