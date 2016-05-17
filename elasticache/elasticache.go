@@ -2,6 +2,7 @@ package elasticache
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -45,15 +46,21 @@ func (c *Client) Set(item *Item) error {
 func New() (*Client, error) {
 	urls, err := clusterNodes()
 	if err != nil {
-		log.Println(err.Error())
+		return &Client{Client: memcache.New()}, err
 	}
 
 	return &Client{Client: memcache.New(urls...)}, nil
 }
 
 func clusterNodes() ([]string, error) {
-	conn, err := net.Dial("tcp", elasticache())
+	endpoint, err := elasticache()
 	if err != nil {
+		return nil, err
+	}
+
+	conn, err := net.Dial("tcp", endpoint)
+	if err != nil {
+		log.Println("Socket Dial: ", err.Error())
 		return nil, err
 	}
 	defer conn.Close()
@@ -74,15 +81,16 @@ func clusterNodes() ([]string, error) {
 	return urls, nil
 }
 
-func elasticache() string {
+func elasticache() (string, error) {
 	var endpoint string
 
 	endpoint = os.Getenv("ELASTICACHE_ENDPOINT")
 	if len(endpoint) == 0 {
-		endpoint = "127.0.0.1:11212"
+		log.Println("ElastiCache endpoint not set")
+		return "", errors.New("ElastiCache endpoint not set")
 	}
 
-	return endpoint
+	return endpoint, nil
 }
 
 func parseNodes(conn io.Reader) (string, error) {
@@ -103,6 +111,7 @@ func parseNodes(conn io.Reader) (string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
+		log.Println("Scanner: ", err.Error())
 		return "", err
 	}
 
@@ -120,6 +129,7 @@ func parseURLs(response string) ([]string, error) {
 
 		port, err := strconv.Atoi(fields[2])
 		if err != nil {
+			log.Println("Integer conversion: ", err.Error())
 			return nil, err
 		}
 
