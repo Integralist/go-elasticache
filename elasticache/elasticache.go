@@ -51,14 +51,14 @@ func init() {
 	if env := os.Getenv("APP_ENV"); env == "test" {
 		root, err := find.Repo()
 		if err != nil {
-			log.Fatalf("Error: %s", err.Error())
+			log.Printf("Repo Error: %s", err.Error())
 		}
 
 		path := fmt.Sprintf("%s/go-elasticache.log", root.Path)
 
 		file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 		if err != nil {
-			log.Printf("Error: %s", err.Error())
+			log.Printf("Open File Error: %s", err.Error())
 		}
 
 		logger = log.New(file, "go-elasticache: ", log.Ldate|log.Ltime|log.Lshortfile)
