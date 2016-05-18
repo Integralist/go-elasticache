@@ -1,4 +1,4 @@
 .PHONY: tests
 
 tests:
-	APP_ENV=test go test $$(glide novendor)
+	APP_ENV=test go test -v $$(glide novendor)
