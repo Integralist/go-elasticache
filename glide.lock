@@ -6,5 +6,5 @@ imports:
   subpackages:
   - memcache
 - name: github.com/integralist/go-findroot
-  version: fc652f389c0a31e72102f8cfa9f1698cef39d694
+  version: ac90681525dc30c2163cc606675922b7fdb9c041
 devImports: []
