@@ -66,8 +66,8 @@ func init() {
 }
 
 // New returns an instance of the memcache client
-func New() (*Client, error) {
-	urls, err := clusterNodes()
+func New(endpoint string) (*Client, error) {
+	urls, err := clusterNodes(endpoint)
 	if err != nil {
 		return &Client{Client: memcache.New()}, err
 	}
@@ -75,8 +75,8 @@ func New() (*Client, error) {
 	return &Client{Client: memcache.New(urls...)}, nil
 }
 
-func clusterNodes() ([]string, error) {
-	endpoint, err := elasticache()
+func clusterNodes(endpoint string) ([]string, error) {
+	endpoint, err := elasticache(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -104,10 +104,7 @@ func clusterNodes() ([]string, error) {
 	return urls, nil
 }
 
-func elasticache() (string, error) {
-	var endpoint string
-
-	endpoint = os.Getenv("ELASTICACHE_ENDPOINT")
+func elasticache(endpoint string) (string, error) {
 	if len(endpoint) == 0 {
 		logger.Println("ElastiCache endpoint not set")
 		return "", errors.New("ElastiCache endpoint not set")
