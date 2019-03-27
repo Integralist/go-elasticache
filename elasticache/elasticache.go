@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -46,7 +47,7 @@ func (c *Client) Set(item *Item) error {
 var logger *log.Logger
 
 func init() {
-	logger = log.New(os.Stdout, "go-elasticache: ", log.Ldate|log.Ltime|log.Lshortfile)
+	logger = log.New(ioutil.Discard, "go-elasticache: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 	if env := os.Getenv("APP_ENV"); env == "test" {
 		root, err := find.Repo()
