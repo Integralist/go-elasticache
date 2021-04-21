@@ -13,6 +13,7 @@ import (
 
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/integralist/go-findroot/find"
+	"github.com/thompsonlabs/go-elasticache/lister"
 )
 
 // Node is a single ElastiCache node
@@ -29,6 +30,7 @@ type Item memcache.Item
 // Client embeds the memcache client so we can hide those details away
 type Client struct {
 	*memcache.Client
+	clusterNodeLister *lister.ClusterNodesKeyLister
 }
 
 // Set abstracts the memcache client details away,
@@ -72,7 +74,14 @@ func New() (*Client, error) {
 		return &Client{Client: memcache.New()}, err
 	}
 
-	return &Client{Client: memcache.New(urls...)}, nil
+	return &Client{Client: memcache.New(urls...),
+		clusterNodeLister: lister.NewClusterNodeKeyLister(urls)}, nil
+}
+
+//Lists all keys stored accross all nodes in the Cluster.
+func (c *Client) ListAllKeys() ([]string, error) {
+
+	return c.clusterNodeLister.ListAllHostKeys()
 }
 
 func clusterNodes() ([]string, error) {
