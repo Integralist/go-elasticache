@@ -104,7 +104,7 @@ func NewInstance(endpointEnvVarName string) (*Client, error) {
 }
 
 //Lists all keys stored accross all nodes in the Cluster.
-func (c *Client) ListAllKeys() ([]string, error) {
+func (c *Client) ListAllKeys() (*[]string, error) {
 
 	return c.clusterNodeLister.ListAllHostKeys()
 }

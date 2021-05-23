@@ -28,9 +28,9 @@ func NewClusterNodeKeyLister(nodeUrls []string) *ClusterNodesKeyLister {
 }
 
 //ListAllHostKeys - Lists all keys associated with all nodes in the cluster.
-func (cnkl *ClusterNodesKeyLister) ListAllHostKeys() ([]string, error) {
+func (cnkl *ClusterNodesKeyLister) ListAllHostKeys() (*[]string, error) {
 
-	allClusterNodeKeys := make([]string, 1)
+	allClusterNodeKeys := make([]string, 0)
 
 	for _, currentNode := range cnkl.clusterNodeUrls {
 
@@ -42,12 +42,15 @@ func (cnkl *ClusterNodesKeyLister) ListAllHostKeys() ([]string, error) {
 
 		} else {
 
-			allClusterNodeKeys = append(allClusterNodeKeys, currentNodeKeys...)
+			for _, currentNodeCurrentKey := range *currentNodeKeys {
+
+				allClusterNodeKeys = append(allClusterNodeKeys, currentNodeCurrentKey)
+			}
 		}
 
 	}
 
-	return allClusterNodeKeys, nil
+	return &allClusterNodeKeys, nil
 }
 
 //private functions.
@@ -88,8 +91,8 @@ OUTER:
 	return result
 }
 
-func (cnkl *ClusterNodesKeyLister) listHostKeys(aHostAddressAndPort string) ([]string, error) {
-	keys := []string{}
+func (cnkl *ClusterNodesKeyLister) listHostKeys(aHostAddressAndPort string) (*[]string, error) {
+	keys := make([]string, 0)
 	conn, err := cnkl.getNewConnection(aHostAddressAndPort)
 	if err != nil {
 
@@ -127,5 +130,5 @@ func (cnkl *ClusterNodesKeyLister) listHostKeys(aHostAddressAndPort string) ([]s
 
 	conn.Close()
 
-	return keys, nil
+	return &keys, nil
 }
