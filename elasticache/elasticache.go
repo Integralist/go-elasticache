@@ -13,6 +13,7 @@ import (
 
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/integralist/go-findroot/find"
+	"github.com/thompsonlabs/go-elasticache/lister"
 )
 
 // Node is a single ElastiCache node
@@ -29,6 +30,7 @@ type Item memcache.Item
 // Client embeds the memcache client so we can hide those details away
 type Client struct {
 	*memcache.Client
+	clusterNodeLister *lister.ClusterNodesKeyLister
 }
 
 // Set abstracts the memcache client details away,
@@ -44,6 +46,10 @@ func (c *Client) Set(item *Item) error {
 }
 
 var logger *log.Logger
+
+//new var to hold endpoint environment variable name this instance should use.
+//this allows each instance of this class to be associated with their own endpoint.
+var endpointEnvironmentVarName string
 
 func init() {
 	logger = log.New(os.Stdout, "go-elasticache: ", log.Ldate|log.Ltime|log.Lshortfile)
@@ -67,12 +73,40 @@ func init() {
 
 // New returns an instance of the memcache client
 func New() (*Client, error) {
+	endpointEnvironmentVarName = "ELASTICACHE_ENDPOINT"
 	urls, err := clusterNodes()
 	if err != nil {
 		return &Client{Client: memcache.New()}, err
 	}
 
-	return &Client{Client: memcache.New(urls...)}, nil
+	return &Client{Client: memcache.New(urls...),
+		clusterNodeLister: lister.NewClusterNodeKeyLister(urls)}, nil
+}
+
+// NewInstance - returns an instance of the memcache client, this alternative constructor
+//               allows an endpoint environment variable to be specified specific to this
+//               instance. Where a value is not provided the default value: ELASTICACHE_ENDPOINT
+//               will be used.
+func NewInstance(endpointEnvVarName string) (*Client, error) {
+	if len(endpointEnvVarName) < 1 {
+		endpointEnvironmentVarName = "ELASTICACHE_ENDPOINT"
+	} else {
+		endpointEnvironmentVarName = endpointEnvVarName
+	}
+
+	urls, err := clusterNodes()
+	if err != nil {
+		return &Client{Client: memcache.New()}, err
+	}
+
+	return &Client{Client: memcache.New(urls...),
+		clusterNodeLister: lister.NewClusterNodeKeyLister(urls)}, nil
+}
+
+//Lists all keys stored accross all nodes in the Cluster.
+func (c *Client) ListAllKeys() (*[]string, error) {
+
+	return c.clusterNodeLister.ListAllHostKeys()
 }
 
 func clusterNodes() ([]string, error) {
@@ -107,7 +141,7 @@ func clusterNodes() ([]string, error) {
 func elasticache() (string, error) {
 	var endpoint string
 
-	endpoint = os.Getenv("ELASTICACHE_ENDPOINT")
+	endpoint = os.Getenv(endpointEnvironmentVarName)
 	if len(endpoint) == 0 {
 		logger.Println("ElastiCache endpoint not set")
 		return "", errors.New("ElastiCache endpoint not set")
